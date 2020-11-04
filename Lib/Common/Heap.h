@@ -49,7 +49,6 @@ class Heap
       if (size + nbytes >= capacity) {
         printf("QPULib error: heap '%s' is full.\n", heapName);
         exit(-1);
-        return (T*) NULL;
       }
       else {
         uint8_t* p = base + size;

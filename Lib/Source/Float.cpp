@@ -62,7 +62,7 @@ Float& Float::operator=(Float& rhs)
   { assign(this->expr, rhs.expr); return rhs; }
 
 FloatExpr Float::operator=(FloatExpr rhs)
-  { assign(this->expr, rhs.expr); return rhs; };
+  { assign(this->expr, rhs.expr); return rhs; }
 
 // ============================================================================
 // Generic operations

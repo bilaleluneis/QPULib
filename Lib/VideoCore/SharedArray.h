@@ -85,8 +85,8 @@ template <typename T> class SharedArray {
 template <typename T> class SharedArray {
  private:
   // Disallow assignment & copying
-  void operator=(SharedArray<T> a);
-  void operator=(SharedArray<T>& a);
+  void operator=(SharedArray<T> a) = delete;
+  void operator=(SharedArray<T>& a) =  delete;
   SharedArray(const SharedArray<T>& a);
 
   uint32_t handle;
@@ -149,7 +149,7 @@ template <typename T> class SharedArray {
   }
 
   // Subscript
-  inline T& operator[] (int i) {
+  inline T& operator[] (size_t i) {
     uint32_t* base = (uint32_t*) arm_base;
     return (T&) base[i];
   }

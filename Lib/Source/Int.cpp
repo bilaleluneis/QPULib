@@ -64,7 +64,7 @@ Int& Int::operator=(Int& rhs)
   { assign(this->expr, rhs.expr); return rhs; }
 
 IntExpr Int::operator=(IntExpr rhs)
-  { assign(this->expr, rhs.expr); return rhs; };
+  { assign(this->expr, rhs.expr); return rhs; }
 
 // ============================================================================
 // Generic operations

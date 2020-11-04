@@ -1,4 +1,3 @@
-#include <assert.h>
 #include "Source/Syntax.h"
 #include "Target/ReachingDefs.h"
 #include "Target/Subst.h"
