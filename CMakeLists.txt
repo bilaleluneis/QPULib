@@ -12,6 +12,7 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wconversion -fpermissive")
+set(PYBIND11_PYTHON_VERSION 3.7)
 
 #add_compile_definitions(DEBUG) # ENABLE DEBUGGING LOGS
 #add_compile_definitions(EMULATION_MODE) # USE EMULATION MODE
@@ -19,6 +20,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wconversion -fpermissive")
 add_compile_definitions(QPU_MODE) # USE ACTUAL HARDWARED QPU ON VPU OF THE GPU UP TO 12 CORES ARE AVAILABLE
 
 find_package(Boost 1.67 REQUIRED COMPONENTS unit_test_framework)
+find_package(pybind11 REQUIRED) # allow writing python bindings
 
 enable_testing()
 
@@ -69,7 +71,15 @@ set(QPU_INCLUDES
         # Lib
         Lib/Kernel.h
         Lib/Params.h
-        Lib/QPULib.h)
+        Lib/QPULib.h
+
+        # Utils
+        Utils/executor.h)
+
+set(QPU_INCLUDE_DIRS
+
+        ${CMAKE_CURRENT_SOURCE_DIR}/Lib
+        ${CMAKE_CURRENT_SOURCE_DIR}/Utils)
 
 set(QPU_SOURCES
 
@@ -105,20 +115,41 @@ set(QPU_SOURCES
         Lib/Source/Translate.cpp
 
         # Lib
-        Lib/Kernel.cpp)
+        Lib/Kernel.cpp
 
-set(QPU_TESTS
+        # Utils
+        Utils/executor.cpp)
 
-        Tests/VectorOperations.cpp
-        Tests/Runner.cpp)
+set(QPU_PYBIND11_SOURCES
+
+        Pybind11/operation.cpp)
+
+set(QPU_UTILS_TESTS
+
+        Tests/utils/VectorOperations.cpp
+        Tests/utils/Runner.cpp)
+
+set(QPU_PYBIND11_TESTS
+
+        Tests/pybind11/add.cpp
+        Tests/pybind11/Runner.cpp)
 
 # Build QPU Shared Library Target
 add_library(qpu SHARED ${QPU_SOURCES} ${QPU_INCLUDES})
-target_include_directories(qpu PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Lib)
+target_include_directories(qpu PUBLIC ${QPU_INCLUDE_DIRS})
 
-# Build Tests Target
-add_executable(qpuTests ${QPU_TESTS} ${QPU_SOURCES} ${QPU_INCLUDES})
-target_include_directories(qpuTests PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Lib)
-target_link_libraries(qpuTests Boost::unit_test_framework)
-target_compile_definitions(qpuTests PRIVATE BOOST_TEST_DYN_LINK)
+# Build Utils Tests Target
+add_executable(qpuUtilsTests ${QPU_UTILS_TESTS})
+target_include_directories(qpuUtilsTests PUBLIC ${QPU_INCLUDE_DIRS})
+target_link_libraries(qpuUtilsTests Boost::unit_test_framework qpu)
+target_compile_definitions(qpuUtilsTests PRIVATE BOOST_TEST_DYN_LINK)
+
+# Build Pybind11 Python Library Target
+pybind11_add_module(pyQpu SHARED ${QPU_PYBIND11_SOURCES} ${QPU_SOURCES} ${QPU_INCLUDES})
+target_include_directories(pyQpu PUBLIC ${QPU_INCLUDE_DIRS})
+
+# Build Pybind11 Python Library Tests
+add_executable(qpuPybind11Tests ${QPU_PYBIND11_TESTS})
+target_link_libraries(qpuPybind11Tests Boost::unit_test_framework pybind11::embed python3.7m)
+target_compile_definitions(qpuPybind11Tests PRIVATE BOOST_TEST_DYN_LINK)
 
